@@ -1,10 +1,10 @@
 #include "pch.h"
-#include "CMscnProblem.h"
-#include "CTable.h"
-#include "CMatrix.h"
+
 #include <fstream>
 #include <string>
 #include <iostream>
+
+#include "CMscnProblem.h"
 
 
 #define NUMBER_OF_SUPPLIERS 2
@@ -89,6 +89,30 @@ bool CMscnProblem::setInCm(double value, int i, int j)
 {
 	return setInMatrix(cm, value, i, j);
 }
+bool CMscnProblem::setInMinXd(double value, int i, int j)
+{
+	return setInMatrix(xdMin, value, i, j);
+}
+bool CMscnProblem::setInMaxXd(double value, int i, int j)
+{
+	return setInMatrix(xdMax, value, i, j);
+}
+bool CMscnProblem::setInMinXf(double value, int i, int j)
+{
+	return setInMatrix(xfMin, value, i, j);
+}
+bool CMscnProblem::setInMaxXf(double value, int i, int j)
+{
+	return setInMatrix(xfMax, value, i, j);
+}
+bool CMscnProblem::setInMinXm(double value, int i, int j)
+{
+	return setInMatrix(xmMin, value, i, j);
+}
+bool CMscnProblem::setInMaxXm(double value, int i, int j)
+{
+	return setInMatrix(xmMax, value, i, j);
+}
 
 bool CMscnProblem::setInSd(double value, int i)
 {
@@ -124,9 +148,78 @@ bool CMscnProblem::setInPs(double value, int i)
 }
 void CMscnProblem::readFromFile(const char * fileName)
 {
-	std::ifstream file(fileName);
+	std::fstream file(fileName);
 
-	char trash;
+	std::string trash;
+	char garbage;
+
+	file >> garbage;
+	file >> delivers;
+	file >> garbage;
+	file >> factories;
+	file >> garbage;
+	file >> magazines;
+	file >> garbage;
+	file >> shops;
+
+	std::getline(file, trash);
+	std::getline(file, trash);
+
+
+	readTableFromFile(file, sd);
+
+	std::getline(file, trash);
+
+	readTableFromFile(file, sf);
+
+	std::getline(file, trash);
+
+	readTableFromFile(file, sm);
+
+	std::getline(file, trash);
+
+	readTableFromFile(file, ss);
+
+	std::getline(file, trash);
+
+	readMatrixFromFile(file, cd, delivers, factories);
+	
+	std::getline(file, trash);
+
+	readMatrixFromFile(file, cf, factories, magazines);
+
+	std::getline(file, trash);
+
+	readMatrixFromFile(file, cm, magazines, shops);
+
+	std::getline(file, trash);
+
+	readTableFromFile(file, ud);
+
+	std::getline(file, trash);
+
+	readTableFromFile(file, uf);
+
+	std::getline(file, trash);
+
+	readTableFromFile(file, um);
+
+	std::getline(file, trash);
+
+	readTableFromFile(file, ps);
+
+	std::getline(file,trash);
+
+	readMinAndMax(file, xdMin, xdMax, delivers, factories);
+
+	std::getline(file, trash);
+
+	readMinAndMax(file, xfMin, xfMax, factories, magazines);
+
+	std::getline(file, trash);
+
+	readMinAndMax(file, xmMin, xmMax, magazines, shops);
+
 
 }
 
@@ -151,15 +244,21 @@ void CMscnProblem::saveToFile(const char * fileName)
 	file << "sf \n";
 	saveTableToFile(file, sf);
 	file << "\n";
+	file << "sm \n";
+	saveTableToFile(file, sm);
+	file << "\n";
 	file << "ss \n";
 	saveTableToFile(file, ss);
 	file << "\n";
 	file << "cd \n";
 	saveMatrixToFile(file, cd);
+	file << "\n";
 	file << "cf \n";
 	saveMatrixToFile(file, cf);
+	file << "\n";
 	file << "cm \n";
 	saveMatrixToFile(file, cm);
+	file << "\n";
 	file << "ud \n";
 	saveTableToFile(file, ud);
 	file << "\n";
@@ -175,88 +274,57 @@ void CMscnProblem::saveToFile(const char * fileName)
 	file.close();
 }
 
-double CMscnProblem::getQuality(double * pdSolution, int tableLen, int * err)
+double CMscnProblem::getQuality(CSolution& input_solution, int * err)
 {
-	*err = errorCheck(pdSolution, tableLen);
-	if (*err != 0) return false;
+	if (err != NULL)
+	{
+		*err = errorCheck(input_solution);
+		if (*err != 0) return false;
+	}
 
-	xd.resize(factories, delivers);
-	xf.resize(magazines, factories);
-	xm.resize(shops, magazines);
-
-	for (int i = 0; i < delivers; i++)
-		for (int j = 0; j < factories; j++)
-			xd.set(pdSolution[i*factories + j], i, j);
-
-	int xdSize = xd.getMaxSize();
-
-	for (int i = 0; i < factories; i++)
-		for (int j = 0; j < magazines; j++)
-			xf.set(pdSolution[xdSize + i * magazines + j], i, j);
-
-	int xfSize = xf.getMaxSize();
-
-	for (int i = 0; i < magazines; i++)
-		for (int j = 0; j < shops; j++)
-			xm.set(pdSolution[xdSize + xfSize + i * shops + j], i, j);
+	solution = input_solution;
 
 	return calculateProfit();
 }
 
-bool CMscnProblem::constrainedSatisfied(double * pdSolution, int tableLen,int * err)
+bool CMscnProblem::constrainedSatisfied(CSolution& input_solution, int * err)
 {
-	*err = errorCheck(pdSolution,tableLen);
-	if (*err != 0) return false;
+	if (err != NULL)
+	{
+		*err = errorCheck(input_solution);
+		if (*err != 0) return false;
+	}
 
-	xd.resize(factories, delivers);
-	xf.resize(magazines, factories);
-	xm.resize(shops, magazines);
-
-	for (int i = 0; i < delivers; i++)
-		for (int j = 0; j < factories; j++)
-			xd.set(pdSolution[i*factories + j], i, j);
-
-	int xdSize = xd.getMaxSize();
-
-	for (int i = 0; i < factories; i++)
-		for (int j = 0; j < magazines; j++)
-			xf.set(pdSolution[xdSize + i * magazines + j], i, j);
-
-	int xfSize = xf.getMaxSize();
-
-	for (int i = 0; i < magazines; i++)
-		for (int j = 0; j < shops; j++)
-			xm.set(pdSolution[xdSize + xfSize + i * shops + j], i, j);
-
+	solution = input_solution;
 
 	for (int i = 0; i < delivers; i++)
 	{
-		if (xd.sumInRow(i) > sd.getValue(i)) return false;
+		if (solution.getXd().sumInRow(i) > sd.getValue(i)) return false;
 	}
 
 	for (int i = 0; i < factories; ++i)
 	{
-		if (xf.sumInRow(i) > sf.getValue(i)) return false;
+		if (solution.getXf().sumInRow(i) > sf.getValue(i)) return false;
 	}
 
 	for (int i = 0; i < magazines; ++i)
 	{
-		if (xm.sumInRow(i) > sm.getValue(i)) return false;
+		if (solution.getXm().sumInRow(i) > sm.getValue(i)) return false;
 	}
 
 	for (int i = 0; i < shops; ++i)
 	{
-		if (xm.sumInColumn(i) > ss.getValue(i)) return false;
+		if (solution.getXm().sumInColumn(i) > ss.getValue(i)) return false;
 	}
 
 	for (int i = 0; i < factories; ++i)
 	{
-		if (xd.sumInColumn(i) > xf.sumInRow(i)) return false;
+		if (solution.getXd().sumInColumn(i) > solution.getXf().sumInRow(i)) return false;
 	}
 
 	for (int i = 0; i < magazines; ++i)
 	{
-		if (xd.sumInColumn(i) > xm.sumInRow(i)) return false;
+		if (solution.getXd().sumInColumn(i) > solution.getXm().sumInRow(i)) return false;
 	}
 
 	return true;
@@ -267,13 +335,17 @@ double CMscnProblem::calculateProfit()
 	return calculateP() - calculateKu() - calculateKt();
 }
 
-bool CMscnProblem::readFile(char* fileName)
-{	
-	return true;
-}
-
 void CMscnProblem::debuggingPrint()
 {
+	std::cout << "D ";
+	std::cout << delivers << "\n";
+	std::cout << "F ";
+	std::cout << factories << "\n";
+	std::cout << "M ";
+	std::cout << magazines << "\n";
+	std::cout << "S ";
+	std::cout << shops << "\n";
+
 	std::cout << "cd" << "\n";
 	cd.print();
 	std::cout << "cf" << "\n";
@@ -281,12 +353,12 @@ void CMscnProblem::debuggingPrint()
 	std::cout << "cm" << "\n";
 	cm.print();
 
-	std::cout << "xf" << "\n";
-	xf.print();
+	/*std::cout << "xf" << "\n";
+	solution.getXf().print();
 	std::cout << "xm" << "\n";
-	xm.print();
+	solution.getXm().print();
 	std::cout << "xd" << "\n";
-	xd.print();
+	solution.getXd().print();*/
 
 	std::cout << "cd" << "\n";
 	sd.printTable();
@@ -306,19 +378,128 @@ void CMscnProblem::debuggingPrint()
 	ps.printTable();
 }
 
-int CMscnProblem::errorCheck(double * pdSolution, int tableLen)
+int CMscnProblem::errorCheck(CSolution& input_solution)
 {
-	int size = delivers * factories + factories * magazines + magazines * shops;
-	if (tableLen != size) return -1;
-	else if (pdSolution == NULL) return -2;
-	else
+	/*int size = delivers * factories + factories * magazines + magazines * shops;
+	if (solution.getXd().getMaxSize() + solution.getXf().getMaxSize() + solution.getXm().getMaxSize() != size) return -1;*/
+	return 0;
+}
+
+void CMscnProblem::generateInstances(int iInstanceSeed)
+{
+	CRandom random(iInstanceSeed);
+	
+	randomizeInTable(ud,random, 0, 1000);
+	randomizeInTable(uf, random, 0, 1000);
+	randomizeInTable(um, random, 0, 1000);
+	randomizeInTable(sd, random, 0, 1000);
+	randomizeInTable(sf, random, 0, 1000);
+	randomizeInTable(sm, random, 0, 1000);
+	randomizeInTable(ss, random, 0, 1000);
+	randomizeInMatrix(cd, random, 0, 1000);
+	randomizeInMatrix(cf, random, 0, 1000);
+	randomizeInMatrix(cm, random, 0, 1000);
+
+}
+
+void CMscnProblem::saveTableToFile(std::fstream & fs, CTable & table)
+{
+	for (int i = 0; i < table.getTableLen(); i++)
 	{
-		for (int i = 0; i < size; i++)
-		{
-			if (pdSolution[i] < 0) return -3;
-		}
-		return 0;
+		fs << table.getValue(i) << " ";
 	}
+}
+
+void CMscnProblem::saveMatrixToFile(std::fstream & fs, CMatrix & matrix)
+{
+	for (int ii = 0; ii < matrix.getRows(); ii++)
+	{
+		for (int jj = 0; jj < matrix.getColumns(); jj++)
+		{
+			fs << matrix.get(ii, jj) << " ";
+		}
+	}
+}
+
+void CMscnProblem::readTableFromFile(std::fstream & fs, CTable & table)
+{
+	std::vector<double> vector;
+
+	std::string str;
+
+	std::getline(fs, str);
+
+	std::istringstream ss(str);
+	double num;
+	while (ss >> num)
+	{
+		vector.push_back(num);
+	}
+
+
+	table.setNewSize(vector.size());
+	for (int i = 0; i < table.getTableLen(); i++)
+	{
+		table.setValue(i, vector[i]);
+	}
+}
+
+void CMscnProblem::readMatrixFromFile(std::fstream & fs, CMatrix & matrix, int rows, int columns)
+{
+	std::vector<double> vector;
+
+	std::string str;
+
+	std::getline(fs, str);
+
+	std::istringstream ss(str);
+	double num;
+	while (ss >> num)
+	{
+		vector.push_back(num);
+	}
+	if (columns*rows != vector.size()) return;
+
+	matrix.resize(rows, columns);
+	int helpVec = 0;
+
+
+	for (int i = 0; i < rows; i++)
+		for (int j = 0; j < columns; j++)
+		{
+			matrix.set(vector[helpVec], i, j);
+			helpVec++;
+		}
+}
+
+void CMscnProblem::readMinAndMax(std::fstream & fs, CMatrix & min, CMatrix & max, int rows, int columns)
+{
+	std::vector<double> vector;
+
+	std::string str;
+
+	std::getline(fs, str);
+
+	std::istringstream ss(str);
+	double num;
+	while (ss >> num)
+	{
+		vector.push_back(num);
+	}
+	if (columns*rows * 2 != vector.size()) return;
+
+	min.resize(rows, columns);
+	max.resize(rows, columns);
+
+	int helpVec = 0;
+
+	for (int i = 0; i < rows; i++)
+		for (int j = 0; j < columns; j++)
+		{
+			min.set(vector[helpVec], i, j);
+			helpVec++;
+			max.set(vector[helpVec], i, j);
+		}
 }
 
 double CMscnProblem::calculateKt()
@@ -327,19 +508,19 @@ double CMscnProblem::calculateKt()
 
 	for (int i = 0; i < delivers; i++)
 		for (int j = 0; j < factories; j++)
-			resultDelivery += cd.get(i, j) * xd.get(j, i);
+			resultDelivery += cd.get(i, j) * solution.getXd().get(j, i);
 
 	double resultMagazine = 0;
 
 	for (int i = 0; i < factories; i++)
 		for (int j = 0; j < magazines; j++)
-			resultMagazine += cf.get(i, j) * xf.get(j, i);
+			resultMagazine += cf.get(i, j) * solution.getXf().get(j, i);
 
 	double resultShop = 0;
 
 	for (int i = 0; i < magazines; i++)
 		for (int j = 0; j < shops; j++)
-			resultShop += cm.get(i, j) * xm.get(j, i);
+			resultShop += cm.get(i, j) * solution.getXm().get(j, i);
 
 	return resultDelivery + resultMagazine + resultShop;
 }
@@ -350,20 +531,20 @@ double CMscnProblem::calculateKu()
 
 	for (int i = 0; i < delivers; i++)
 		for (int j = 0; j < factories; j++)
-			if (xd.sumInRow(j) > 0) resultDelivery += ud.getValue(i);
+			if (solution.getXd().sumInRow(j) > 0) resultDelivery += ud.getValue(i);
 
 	double resultMagazine = 0;
 
 	for (int i = 0; i < factories; i++)
 		for (int j = 0; j < magazines; j++)
-			if (xf.sumInRow(j) > 0) resultMagazine += uf.getValue(i);
+			if (solution.getXf().sumInRow(j) > 0) resultMagazine += uf.getValue(i);
 
 	double resultShop = 0;
 
 
 	for (int i = 0; i < magazines; i++)
 		for (int j = 0; j < shops; j++)
-			if (xm.sumInRow(j) > 0) resultMagazine += um.getValue(i);
+			if (solution.getXm().sumInRow(j) > 0) resultMagazine += um.getValue(i);
 
 	return resultDelivery + resultMagazine + resultShop;
 }
@@ -373,7 +554,7 @@ double CMscnProblem::calculateP()
 	double result = 0;
 	for (int i = 0; i < magazines; i++)
 		for (int j = 0; j < shops; j++)
-			result += ps.getValue(j) * xm.get(i, j);
+			result += ps.getValue(j) * solution.getXm().get(i, j);
 	return result;
 }
 
@@ -403,4 +584,45 @@ bool CMscnProblem::setInVector(std::vector<double> &vec, double value, int i)
 
 	return true;
 
+}
+
+void CMscnProblem::randomizeInTable(CTable & tab, CRandom& random, double min, double max)
+{
+	for (int i = 0; i < tab.getTableLen(); i++)
+	{
+		tab.setValue(i, random.nextDouble(min, max));
+	}
+}
+
+void CMscnProblem::randomizeInMatrix(CMatrix & mat, CRandom& random, double min, double max)
+{
+	for (int i = 0; i < mat.getRows(); i++)
+		for (int j = 0; j < mat.getColumns(); j++)
+		{
+			mat.set(random.nextDouble(min, max), i, j);
+		}
+}
+
+bool CMscnProblem::checkIfMinMaxIsRight(CSolution& solution)
+{
+	for(int i=0; i < delivers; i++)
+		for (int j = 0; j < factories; j++)
+		{
+			if (!(xdMin.get(i, j) < solution.getXd().get(i, j) < xdMax.get(i, j)))
+				return false;
+		}
+	for (int i = 0; i < factories; i++)
+		for (int j = 0; j < magazines; j++)
+		{
+			if (!(xfMin.get(i, j) < solution.getXf().get(i, j) < xfMax.get(i, j)))
+				return false;
+		}
+	for (int i = 0; i < magazines; i++)
+		for (int j = 0; j < shops; j++)
+		{
+			if (!(xmMin.get(i, j) < solution.getXm().get(i, j) < xmMax.get(i, j)))
+				return false;
+		}
+
+	return true;
 }

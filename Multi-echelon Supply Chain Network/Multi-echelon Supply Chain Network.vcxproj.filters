@@ -21,6 +21,12 @@
     <ClInclude Include="CTable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CSolution.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CRandomSearch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -41,9 +47,24 @@
     <ClCompile Include="CMscnProblem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CSolution.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CRandom.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CRandomSearch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="test.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="readProblem.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="readSolution.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

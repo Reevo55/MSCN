@@ -1,14 +1,15 @@
 #include "pch.h"
 #include <iostream>
-#include "CMatrix.h"
-#include "CTable.h"
+
+#include "CSolution.h"
+#include "CRandom.h"
+#include "CRandomSearch.h"
 #include "CMscnProblem.h"
 
 void test()
 {
-	CMscnProblem problem;
 
-	const int testDCount = 1;
+	/*const int testDCount = 1;
 	const int testFCount = 1;
 	const int testMCount = 1;
 	const int testSCount = 1;
@@ -43,16 +44,23 @@ void test()
 	problem.setInUd(100, 0);
 	problem.setInUf(100, 0);
 	problem.setInUm(100, 0);
+	
 
 	int err;
-	double * solution = new double[3]{ 10, 10, 10 };
 
-	std::cout << "\n Quality : " << problem.getQuality(solution, 3, &err);
-	std::cout << "\n Constrainits satisfied: " << problem.constrainedSatisfied(solution, 3, &err) << "\n";
+	double * solution = new double[3]{ 10, 10, 10 };*/
 
-	problem.saveToFile("test.txt");
+	CMscnProblem* problem = new CMscnProblem();
 
-	problem.debuggingPrint();
+	CSolution csolution;
+	csolution.readFromFile("readSolution.txt");
+	csolution.print();
+
+	(*problem).readFromFile("readProblem.txt");
+
+	CRandomSearch randomSearch(problem);
+
+	randomSearch.randomSearch(300, csolution);
 }
 
 int main()

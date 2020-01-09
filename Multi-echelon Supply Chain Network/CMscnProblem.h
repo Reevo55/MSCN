@@ -1,8 +1,15 @@
+#pragma once
 #include "pch.h"
 #include <vector>
-#include "CMatrix.h"
-#include "CTable.h"
+#include <string>
 #include <fstream>
+#include <sstream>
+#include <fstream>
+
+#include "CSolution.h"
+#include "CTable.h"
+#include "CMatrix.h"
+#include "CRandom.h"
 
 class CMscnProblem
 {
@@ -17,6 +24,13 @@ public:
 	bool setInCd(double value, int i, int j);
 	bool setInCf(double value, int i, int j);
 	bool setInCm(double value, int i, int j);
+	bool setInMinXd(double value, int i, int j);
+	bool setInMaxXd(double value, int i, int j);
+	bool setInMinXf(double value, int i, int j);
+	bool setInMaxXf(double value, int i, int j);
+	bool setInMinXm(double value, int i, int j);
+	bool setInMaxXm(double value, int i, int j);
+
 
 	bool setInSd(double value, int i);
 	bool setInSf(double value, int i);
@@ -27,57 +41,52 @@ public:
 	bool setInUm(double value, int i);
 	bool setInPs(double value, int i);
 
+	bool checkIfMinMaxIsRight(CSolution& solution);
+
+
+	void readFromFile(const char * fileName);
+
 	void saveToFile(const char* fileName);
 	
-	double getQuality(double* pdSolution, int tableLen, int* err);
-	bool constrainedSatisfied(double* pdSolution, int tableLen, int* err);
-
-	bool readFile(char* fileName);
+	double getQuality(CSolution& input_solution, int* err);
+	bool constrainedSatisfied(CSolution& input_solution, int* err);
 
 	void debuggingPrint();
 
-	int errorCheck(double* pdSolution, int tableLen);
+	int errorCheck(CSolution& input_solution);
+
+	void generateInstances(int iInstanceSeed);
+
 private:
 	
-	void saveTableToFile(std::fstream& fs, CTable& table)
-	{
-		for (int i = 0; i < table.getTableLen(); i++)
-		{
-			fs << table.getValue(i) << ";";
-		}
-	}
-	void saveMatrixToFile(std::fstream& fs, CMatrix& matrix)
-	{
-		for (int ii = 0; ii < matrix.getRows(); ii++)
-		{
-			for (int jj = 0; jj < matrix.getColumns(); jj++)
-			{
-				fs << matrix.get(ii, jj) << ";";
-			}
-			fs << "\n";
-		}
-	}
+	void saveTableToFile(std::fstream& fs, CTable& table);
+	void saveMatrixToFile(std::fstream& fs, CMatrix& matrix);
+	void readTableFromFile(std::fstream& fs, CTable& table);
+	void readMatrixFromFile(std::fstream& fs, CMatrix& matrix, int rows, int columns);
+	void readMinAndMax(std::fstream& fs, CMatrix& min, CMatrix& max, int rows, int columns);
 
 	double calculateProfit();
 	double calculateKt();
 	double calculateKu();
 	double calculateP();
+
 	bool setInMatrix(CMatrix& mat, double value, int i, int j);
 	bool setInTable(CTable &vec, double value, int i);
 	bool setInVector(std::vector<double> &vec, double value, int i);
+
+	void randomizeInTable(CTable& tab, CRandom& random, double min, double max);
+	void randomizeInMatrix(CMatrix& mat, CRandom& random, double min, double max);
 
 	int delivers;
 	int factories;
 	int magazines;
 	int shops;
 
+	CSolution solution;
+
 	CMatrix cd;
 	CMatrix cf;
 	CMatrix cm;
-
-	CMatrix xd;
-	CMatrix xf;
-	CMatrix xm;
 
 	CTable sd;
 	CTable sf;
@@ -87,4 +96,13 @@ private:
 	CTable uf;
 	CTable um;
 	CTable ps;
+
+	CMatrix xdMin;
+	CMatrix xdMax;
+	CMatrix xfMin;
+	CMatrix xfMax;
+	CMatrix xmMin;
+	CMatrix xmMax;
+
+	
 };
