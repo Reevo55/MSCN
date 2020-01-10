@@ -3,6 +3,25 @@
 #include "CTable.h"
 
 
+
+bool CSolution::setInXd(double value, int i, int j)
+{
+	setInMatrix(xd, value, i, j);
+	return true;
+}
+
+bool CSolution::setInXm(double value, int i, int j)
+{
+	setInMatrix(xm, value, i, j);
+	return true;
+}
+
+bool CSolution::setInXf(double value, int i, int j)
+{
+	setInMatrix(xf, value, i, j);
+	return true;
+}
+
 void CSolution::readFromFile(const char* fileName)
 {
 	std::fstream file(fileName);
@@ -64,4 +83,30 @@ void CSolution::readFromDoubleTable(double * pdSolution)
 	for (int i = 0; i < magazines; i++)
 		for (int j = 0; j < shops; j++)
 			xm.set(pdSolution[xdSize + xfSize + i * shops + j], i, j);
+}
+void CSolution::saveToFile(const char * fileName)
+{
+	std::fstream file(fileName);
+
+	file.flush();
+
+	file << "D ";
+	file << delivers << "\n";
+	file << "F ";
+	file << factories << "\n";
+	file << "M ";
+	file << magazines << "\n";
+	file << "S ";
+	file << shops << "\n";
+	file << "xd \n";
+	saveMatrixToFile(file, xd);
+	file << "\n";
+	file << "xf \n";
+	saveMatrixToFile(file, xf);
+	file << "\n";
+	file << "xm \n";
+	saveMatrixToFile(file, xm);
+
+
+	file.close();
 }

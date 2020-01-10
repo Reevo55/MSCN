@@ -5,8 +5,9 @@
 
 #include "pch.h"
 #include <iostream>
-#define DEFAULT_TABLE_LENGTH 5
-#define DEFAULT_TABLE_NAME "DefaultTable"
+#include "CRandom.h"
+#include "constants.h"
+
 class CTable
 {
 public:
@@ -27,9 +28,17 @@ public:
 	bool setValue(int offset, double value);
 	void fillTable();
 	int getTableLen() { return tableLen; }
+	void randomizeInTable(CRandom& random, double min, double max)
+	{
+		for (int i = 0; i < this->getTableLen(); i++)
+		{
+			this->setValue(i, random.nextDouble(min, max));
+		}
+	}
 
 	static int copyCounter;
 	static int moveCounter;
+
 private:
 	void copy(const CTable &other);
 

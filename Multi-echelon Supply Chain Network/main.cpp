@@ -46,9 +46,11 @@ void test()
 	problem.setInUm(100, 0);
 	
 
-	int err;
 
 	double * solution = new double[3]{ 10, 10, 10 };*/
+	
+	
+	int* err = new int;
 
 	CMscnProblem* problem = new CMscnProblem();
 
@@ -57,10 +59,12 @@ void test()
 	csolution.print();
 
 	(*problem).readFromFile("readProblem.txt");
+	std::cout << (*problem).getQuality(csolution, err)<< "\n";
 
+	std::cout << *err;
 	CRandomSearch randomSearch(problem);
 
-	randomSearch.randomSearch(300, csolution);
+	randomSearch.randomSearch(100);
 }
 
 int main()

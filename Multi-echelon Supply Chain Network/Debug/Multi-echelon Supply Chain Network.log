@@ -1,6 +1,3 @@
-﻿  CMscnProblem.cpp
+﻿  main.cpp
 c:\users\radek\documents\github\mscn\mscn\multi-echelon supply chain network\crandom.h(22): warning C4244: '=': conversion from 'time_t' to 'unsigned int', possible loss of data
-c:\users\radek\documents\github\mscn\mscn\multi-echelon supply chain network\cmscnproblem.cpp(611): warning C4804: '<': unsafe use of type 'bool' in operation
-c:\users\radek\documents\github\mscn\mscn\multi-echelon supply chain network\cmscnproblem.cpp(617): warning C4804: '<': unsafe use of type 'bool' in operation
-c:\users\radek\documents\github\mscn\mscn\multi-echelon supply chain network\cmscnproblem.cpp(623): warning C4804: '<': unsafe use of type 'bool' in operation
   Multi-echelon Supply Chain Network.vcxproj -> C:\Users\Radek\Documents\GitHub\MSCN\MSCN\Debug\Mscn.exe

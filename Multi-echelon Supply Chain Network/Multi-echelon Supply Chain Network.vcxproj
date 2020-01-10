@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="constants.h" />
     <ClInclude Include="CRandomSearch.h" />
     <ClInclude Include="CSolution.h" />
     <ClInclude Include="CTable.h" />

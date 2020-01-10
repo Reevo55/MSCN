@@ -3,6 +3,7 @@
 #include "pch.h"
 #include <vector>
 #include "CTable.h"
+#include "CRandom.h"
 
 class CMatrix
 {
@@ -88,6 +89,16 @@ public:
 
 	int getColumns() { return columns; }
 	int getRows() { return rows; }
+
+
+	void randomizeInMatrix(CRandom& random, double min, double max)
+	{
+		for (int i = 0; i < this->getRows(); i++)
+			for (int j = 0; j < this->getColumns(); j++)
+			{
+				this->set(random.nextDouble(min, max), i, j);
+			}
+	}
 private:
 
 	int rows;

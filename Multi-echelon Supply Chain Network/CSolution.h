@@ -26,11 +26,36 @@ public:
 	CMatrix& getXd() { return xd; }
 	CMatrix& getXf() { return xf; }
 	CMatrix& getXm() { return xm; }
+
+	bool setInXd(double value, int i, int j);
+	bool setInXf(double value, int i, int j);
+	bool setInXm(double value, int i, int j);
+
 	void print() { xd.print(); xm.print(); xf.print(); }
 
 	void readFromFile(const char* fileName);
 	void readFromDoubleTable(double* pdSolution);
+
+	void saveToFile(const char * fileName);
 private:
+	void saveMatrixToFile(std::fstream & fs, CMatrix & matrix)
+	{
+		for (int ii = 0; ii < matrix.getRows(); ii++)
+		{
+			for (int jj = 0; jj < matrix.getColumns(); jj++)
+			{
+				fs << matrix.get(ii, jj) << " ";
+			}
+		}
+	}
+	bool setInMatrix(CMatrix& mat, double value, int i, int j) 
+	{
+		if (value < 0 || !mat.checkRowsAndColumns(i, j)) return false;
+
+		mat.set(value, i, j);
+		return true;
+	}
+
 
 	void readMatrixFromFile(std::fstream& fs, CMatrix& matrix, int rows, int columns)
 	{

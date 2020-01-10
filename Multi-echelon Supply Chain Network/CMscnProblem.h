@@ -10,6 +10,7 @@
 #include "CTable.h"
 #include "CMatrix.h"
 #include "CRandom.h"
+#include "constants.h"
 
 class CMscnProblem
 {
@@ -49,13 +50,19 @@ public:
 	void saveToFile(const char* fileName);
 	
 	double getQuality(CSolution& input_solution, int* err);
+	double getQuality(int* err);
+
 	bool constrainedSatisfied(CSolution& input_solution, int* err);
+	bool constrainedSatisfied(int* err);
 
 	void debuggingPrint();
 
 	int errorCheck(CSolution& input_solution);
 
 	void generateInstances(int iInstanceSeed);
+	void randomizeSolution(CRandom& rand);
+
+	CSolution& getSolution() { return solution; }
 
 private:
 	
@@ -74,8 +81,6 @@ private:
 	bool setInTable(CTable &vec, double value, int i);
 	bool setInVector(std::vector<double> &vec, double value, int i);
 
-	void randomizeInTable(CTable& tab, CRandom& random, double min, double max);
-	void randomizeInMatrix(CMatrix& mat, CRandom& random, double min, double max);
 
 	int delivers;
 	int factories;

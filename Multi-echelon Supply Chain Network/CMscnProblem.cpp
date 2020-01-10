@@ -7,11 +7,6 @@
 #include "CMscnProblem.h"
 
 
-#define NUMBER_OF_SUPPLIERS 2
-#define NUMBER_OF_FACTORIES 1
-#define NUMBER_OF_DESTRIBUTION_CENTERS 3
-#define NUMBER_OF_SHOPS 4
-
 CMscnProblem::CMscnProblem()
 {
 	delivers = NUMBER_OF_SUPPLIERS;
@@ -287,6 +282,18 @@ double CMscnProblem::getQuality(CSolution& input_solution, int * err)
 	return calculateProfit();
 }
 
+
+double CMscnProblem::getQuality(int * err)
+{
+	if (err != NULL)
+	{
+		*err = errorCheck(solution);
+		if (*err != 0) return false;
+	}
+
+	return calculateProfit();
+}
+
 bool CMscnProblem::constrainedSatisfied(CSolution& input_solution, int * err)
 {
 	if (err != NULL)
@@ -330,6 +337,47 @@ bool CMscnProblem::constrainedSatisfied(CSolution& input_solution, int * err)
 	return true;
 }
 
+
+bool CMscnProblem::constrainedSatisfied(int * err)
+{
+	if (err != NULL)
+	{
+		*err = errorCheck(solution);
+		if (*err != 0) return false;
+	}
+
+	for (int i = 0; i < delivers; i++)
+	{
+		if (solution.getXd().sumInRow(i) > sd.getValue(i)) return false;
+	}
+
+	for (int i = 0; i < factories; ++i)
+	{
+		if (solution.getXf().sumInRow(i) > sf.getValue(i)) return false;
+	}
+
+	for (int i = 0; i < magazines; ++i)
+	{
+		if (solution.getXm().sumInRow(i) > sm.getValue(i)) return false;
+	}
+
+	for (int i = 0; i < shops; ++i)
+	{
+		if (solution.getXm().sumInColumn(i) > ss.getValue(i)) return false;
+	}
+
+	for (int i = 0; i < factories; ++i)
+	{
+		if (solution.getXd().sumInColumn(i) > solution.getXf().sumInRow(i)) return false;
+	}
+
+	for (int i = 0; i < magazines; ++i)
+	{
+		if (solution.getXd().sumInColumn(i) > solution.getXm().sumInRow(i)) return false;
+	}
+
+	return true;
+}
 double CMscnProblem::calculateProfit()
 {
 	return calculateP() - calculateKu() - calculateKt();
@@ -380,8 +428,10 @@ void CMscnProblem::debuggingPrint()
 
 int CMscnProblem::errorCheck(CSolution& input_solution)
 {
-	/*int size = delivers * factories + factories * magazines + magazines * shops;
-	if (solution.getXd().getMaxSize() + solution.getXf().getMaxSize() + solution.getXm().getMaxSize() != size) return -1;*/
+	if (input_solution.getXd().getMaxSize() != delivers * factories) return -1;
+	if (input_solution.getXf().getMaxSize() != factories * magazines) return -1;
+	if (input_solution.getXm().getMaxSize() != magazines * shops) return -1;
+	
 	return 0;
 }
 
@@ -389,16 +439,16 @@ void CMscnProblem::generateInstances(int iInstanceSeed)
 {
 	CRandom random(iInstanceSeed);
 	
-	randomizeInTable(ud,random, 0, 1000);
-	randomizeInTable(uf, random, 0, 1000);
-	randomizeInTable(um, random, 0, 1000);
-	randomizeInTable(sd, random, 0, 1000);
-	randomizeInTable(sf, random, 0, 1000);
-	randomizeInTable(sm, random, 0, 1000);
-	randomizeInTable(ss, random, 0, 1000);
-	randomizeInMatrix(cd, random, 0, 1000);
-	randomizeInMatrix(cf, random, 0, 1000);
-	randomizeInMatrix(cm, random, 0, 1000);
+	ud.randomizeInTable(random, DEF_MSCN_RAND_U_MIN, DEF_MSCN_RAND_U_MAX);
+	uf.randomizeInTable(random, DEF_MSCN_RAND_U_MIN, DEF_MSCN_RAND_U_MAX);
+	um.randomizeInTable(random, DEF_MSCN_RAND_U_MIN, DEF_MSCN_RAND_U_MAX);
+	sd.randomizeInTable(random, DEF_MSCN_RAND_S_MIN, DEF_MSCN_RAND_S_MIN);
+	sf.randomizeInTable(random, DEF_MSCN_RAND_S_MIN, DEF_MSCN_RAND_S_MIN);
+	sm.randomizeInTable(random, DEF_MSCN_RAND_S_MIN, DEF_MSCN_RAND_S_MIN);
+	ss.randomizeInTable(random, DEF_MSCN_RAND_S_MIN, DEF_MSCN_RAND_S_MIN);
+	cd.randomizeInMatrix(random, DEF_MSCN_RAND_C_MIN, DEF_MSCN_RAND_C_MAX);
+	cf.randomizeInMatrix(random, DEF_MSCN_RAND_C_MIN, DEF_MSCN_RAND_C_MAX);
+	cm.randomizeInMatrix(random, DEF_MSCN_RAND_C_MIN, DEF_MSCN_RAND_C_MAX);
 
 }
 
@@ -564,8 +614,8 @@ bool CMscnProblem::setInMatrix(CMatrix &mat, double value, int i, int j)
 
 	mat.set(value, i, j);
 	return true;
-
 }
+
 bool CMscnProblem::setInTable(CTable &table, double value, int i)
 {
 	if (value < 0 || table.getTableLen() < i) return false;
@@ -586,20 +636,25 @@ bool CMscnProblem::setInVector(std::vector<double> &vec, double value, int i)
 
 }
 
-void CMscnProblem::randomizeInTable(CTable & tab, CRandom& random, double min, double max)
-{
-	for (int i = 0; i < tab.getTableLen(); i++)
-	{
-		tab.setValue(i, random.nextDouble(min, max));
-	}
-}
 
-void CMscnProblem::randomizeInMatrix(CMatrix & mat, CRandom& random, double min, double max)
+void CMscnProblem::randomizeSolution(CRandom& rand)
 {
-	for (int i = 0; i < mat.getRows(); i++)
-		for (int j = 0; j < mat.getColumns(); j++)
+	for (int i = 0; i < solution.getXd().getRows(); i++)
+		for (int j = 0; j < solution.getXd().getColumns(); j++)
 		{
-			mat.set(random.nextDouble(min, max), i, j);
+			solution.setInXd(rand.nextDouble(xdMin.get(i,j), xdMax.get(i,j)), i, j);
+		}
+
+	for (int i = 0; i < solution.getXf().getRows(); i++)
+		for (int j = 0; j < solution.getXf().getColumns(); j++)
+		{
+			solution.setInXf(rand.nextDouble(xfMin.get(i, j), xfMax.get(i, j)), i, j);
+		}
+
+	for (int i = 0; i < solution.getXm().getRows(); i++)
+		for (int j = 0; j < solution.getXm().getColumns(); j++)
+		{
+			solution.setInXm(rand.nextDouble(xmMin.get(i, j), xmMax.get(i, j)), i, j);
 		}
 }
 
