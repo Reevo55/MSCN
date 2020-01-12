@@ -1,10 +1,18 @@
 #include "pch.h"
-
-#include <fstream>
-#include <string>
-#include <iostream>
-
 #include "CMscnProblem.h"
+
+#include "CSolution.h"
+#include "CTable.h"
+#include "CMatrix.h"
+#include "CRandom.h"
+#include "constants.h"
+
+#include <vector>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <fstream>
+#include <iostream>
 
 
 CMscnProblem::CMscnProblem()
@@ -265,6 +273,16 @@ void CMscnProblem::saveToFile(const char * fileName)
 	file << "\n";
 	file << "p \n";
 	saveTableToFile(file, ps);
+	file << "\n";
+	file << "xdminmax \n";
+	saveMatrixMinMaxToFile(file, xdMin, xdMax);
+	file << "\n";
+	file << "xfminmax \n";
+	saveMatrixMinMaxToFile(file, xfMin, xfMax);
+	file << "\n";
+	file << "xmminmax \n";
+	saveMatrixMinMaxToFile(file, xmMin, xmMax);
+	file << "\n";
 
 	file.close();
 }
@@ -292,6 +310,13 @@ double CMscnProblem::getQuality(int * err)
 	}
 
 	return calculateProfit();
+}
+
+double CMscnProblem::getQuality(double * pdSolution, int * err)
+{
+	this->solution = solution.readFromDoubleTable(pdSolution, delivers, factories,shops, magazines);
+	
+	return getQuality(err);
 }
 
 bool CMscnProblem::constrainedSatisfied(CSolution& input_solution, int * err)
@@ -335,6 +360,13 @@ bool CMscnProblem::constrainedSatisfied(CSolution& input_solution, int * err)
 	}
 
 	return true;
+}
+
+bool CMscnProblem::constrainedSatisfied(double * pdSolution, int * err)
+{
+	this->solution = solution.readFromDoubleTable(pdSolution, delivers, factories, shops, magazines);
+
+	return constrainedSatisfied(err);
 }
 
 
@@ -467,6 +499,18 @@ void CMscnProblem::saveMatrixToFile(std::fstream & fs, CMatrix & matrix)
 		for (int jj = 0; jj < matrix.getColumns(); jj++)
 		{
 			fs << matrix.get(ii, jj) << " ";
+		}
+	}
+}
+
+void CMscnProblem::saveMatrixMinMaxToFile(std::fstream & fs, CMatrix & min, CMatrix & max)
+{
+
+	for (int ii = 0; ii < min.getRows(); ii++)
+	{
+		for (int jj = 0; jj < min.getColumns(); jj++)
+		{
+			fs << min.get(ii, jj) << " " << max.get(ii, jj);
 		}
 	}
 }

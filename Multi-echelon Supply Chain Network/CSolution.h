@@ -1,15 +1,14 @@
 #pragma once
 #include "pch.h"
 
-#include "CMatrix.h"
-#include "CTable.h"
-
 #include <fstream>
 #include <vector>
 #include <string>
 #include <fstream>
 #include <sstream>
 
+#include "CMatrix.h"
+#include "CTable.h"
 
 class CSolution {
 public:
@@ -34,7 +33,8 @@ public:
 	void print() { xd.print(); xm.print(); xf.print(); }
 
 	void readFromFile(const char* fileName);
-	void readFromDoubleTable(double* pdSolution);
+	CSolution readFromDoubleTable(double* pdSolution, int delivers, int factories, int shops, int magazines);
+	double* toDoubleTable();
 
 	void saveToFile(const char * fileName);
 private:

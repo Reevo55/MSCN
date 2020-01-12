@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "CSolution.h"
-#include "CTable.h"
+
 
 
 
@@ -62,27 +62,66 @@ void CSolution::readFromFile(const char* fileName)
 
 }
 
-void CSolution::readFromDoubleTable(double * pdSolution)
+CSolution CSolution::readFromDoubleTable(double * pdSolution, int delivers, int factories, int shops, int magazines)
 {
-	xd.resize(factories, delivers);
-	xf.resize(magazines, factories);
-	xm.resize(shops, magazines);
+	CSolution help;
+	help.delivers = delivers;
+	help.factories = factories;
+	help.shops = shops;
+	help.magazines = magazines;
 
-	for (int i = 0; i < delivers; i++)
-		for (int j = 0; j < factories; j++)
-			xd.set(pdSolution[i*factories + j], i, j);
+	help.xd.resize(factories, delivers);
+	help.xf.resize(magazines, factories);
+	help.xm.resize(shops, magazines);
+		
+
+	for (int i = 0; i < delivers; ++i)
+		for (int j = 0; j < factories; ++j)
+			help.xd.set(pdSolution[i*factories + j], i, j);
 
 	int xdSize = xd.getMaxSize();
 
-	for (int i = 0; i < factories; i++)
-		for (int j = 0; j < magazines; j++)
-			xf.set(pdSolution[xdSize + i * magazines + j], i, j);
+	for (int i = 0; i < factories; ++i)
+		for (int j = 0; j < magazines; ++j)
+			help.xf.set(pdSolution[xdSize + i * magazines + j], i, j);
 
 	int xfSize = xf.getMaxSize();
 
+	for (int i = 0; i < magazines; ++i)
+		for (int j = 0; j < shops; ++j)
+			help.xm.set(pdSolution[xdSize + xfSize + i * shops + j], i, j);
+
+	return help;
+}
+double * CSolution::toDoubleTable()
+{
+	int size = delivers * factories + factories * magazines + shops * magazines;
+	double * table = new double[size];
+
+	int k = 0;
+
+	for (int i = 0; i < delivers; i++)
+		for (int j = 0; j < factories; j++)
+		{
+			table[k] = xd.get(i, j);
+			k++;
+		}
+
+	for (int i = 0; i < factories; i++)
+		for (int j = 0; j < magazines; j++)
+		{
+			table[k] = xf.get(i, j);
+			k++;
+		}
+
 	for (int i = 0; i < magazines; i++)
 		for (int j = 0; j < shops; j++)
-			xm.set(pdSolution[xdSize + xfSize + i * shops + j], i, j);
+		{
+			table[k] = xm.get(i, j);
+			k++;
+		}
+
+	return table;
 }
 void CSolution::saveToFile(const char * fileName)
 {

@@ -30,6 +30,9 @@
     <ClInclude Include="constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CDiffEvol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -57,6 +60,9 @@
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="CRandomSearch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CDiffEvol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

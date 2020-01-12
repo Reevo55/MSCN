@@ -5,8 +5,6 @@
 #include <cstdio>
 #include <ctime>
 
-#define TYPE_OF_INT 0
-#define TYPE_OF_DOUBLE 1
 
 class CRandom
 {

@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "CRandomSearch.h"
-#include "CRandom.h"
+
 
 int CRandomSearch::randomSearch(int howMuchTimeInSeconds)
 {
@@ -46,4 +46,20 @@ int CRandomSearch::randomSearch(int howMuchTimeInSeconds)
 	}
 	std::cout << " KONIEC! NAJLEPSZA WARTOŒÆ TO: " << bestQuality << "\n";
 	return bestQuality;
+}
+
+CSolution CRandomSearch::nextValid()
+{
+	CRandom rand(seed);
+
+	while (true)
+	{
+		problem->randomizeSolution(rand);
+		if (problem->constrainedSatisfied(NULL))
+		{
+			CSolution answer;
+			answer = problem->getSolution();
+			return answer;
+		}
+	}
 }

@@ -1,16 +1,20 @@
 #pragma once
 #include "pch.h"
-#include <vector>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <fstream>
 
 #include "CSolution.h"
 #include "CTable.h"
 #include "CMatrix.h"
 #include "CRandom.h"
 #include "constants.h"
+
+#include <vector>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <fstream>
+#include <iostream>
+
+
 
 class CMscnProblem
 {
@@ -51,8 +55,10 @@ public:
 	
 	double getQuality(CSolution& input_solution, int* err);
 	double getQuality(int* err);
+	double getQuality(double* pdSolution, int* err);
 
 	bool constrainedSatisfied(CSolution& input_solution, int* err);
+	bool constrainedSatisfied(double* pdSolution, int* err);
 	bool constrainedSatisfied(int* err);
 
 	void debuggingPrint();
@@ -64,10 +70,14 @@ public:
 
 	CSolution& getSolution() { return solution; }
 
+	int sizeOfSolution(){return delivers * factories + factories * magazines + shops * magazines;}
+
 private:
 	
 	void saveTableToFile(std::fstream& fs, CTable& table);
 	void saveMatrixToFile(std::fstream& fs, CMatrix& matrix);
+	void saveMatrixMinMaxToFile(std::fstream& fs, CMatrix& min, CMatrix& max);
+
 	void readTableFromFile(std::fstream& fs, CTable& table);
 	void readMatrixFromFile(std::fstream& fs, CMatrix& matrix, int rows, int columns);
 	void readMinAndMax(std::fstream& fs, CMatrix& min, CMatrix& max, int rows, int columns);

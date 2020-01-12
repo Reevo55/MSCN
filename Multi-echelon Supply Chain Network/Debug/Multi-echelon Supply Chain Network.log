@@ -1,3 +1,8 @@
-﻿  main.cpp
-c:\users\radek\documents\github\mscn\mscn\multi-echelon supply chain network\crandom.h(22): warning C4244: '=': conversion from 'time_t' to 'unsigned int', possible loss of data
+﻿  CDiffEvol.cpp
+c:\users\radek\documents\github\mscn\mscn\multi-echelon supply chain network\crandom.h(20): warning C4244: '=': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\radek\documents\github\mscn\mscn\multi-echelon supply chain network\cdiffevol.cpp(6): warning C4244: 'initializing': conversion from 'time_t' to 'int', possible loss of data
+c:\users\radek\documents\github\mscn\mscn\multi-echelon supply chain network\cdiffevol.cpp(62): warning C4244: '=': conversion from 'time_t' to 'int', possible loss of data
+  main.cpp
+c:\users\radek\documents\github\mscn\mscn\multi-echelon supply chain network\crandom.h(20): warning C4244: '=': conversion from 'time_t' to 'unsigned int', possible loss of data
+  Generating Code...
   Multi-echelon Supply Chain Network.vcxproj -> C:\Users\Radek\Documents\GitHub\MSCN\MSCN\Debug\Mscn.exe
