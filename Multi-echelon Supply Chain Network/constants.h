@@ -9,6 +9,7 @@
 #define DEF_MSCN_RAND_P_MIN 60
 #define DEF_MSCN_RAND_P_MAX 500
 
+#define REDUCTION_SIZE 0.5
 
 #define TYPE_OF_INT 0
 #define TYPE_OF_DOUBLE 1

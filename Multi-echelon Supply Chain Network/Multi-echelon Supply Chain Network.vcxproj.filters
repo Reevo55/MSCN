@@ -33,6 +33,15 @@
     <ClInclude Include="CDiffEvol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="COptimizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CProblem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

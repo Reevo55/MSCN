@@ -1,22 +1,29 @@
 #include "pch.h"
-#include "CDiffEvol.h"
 
-double CDiffEvol::startDifferentialEvolution(CMscnProblem * problem, double differenceWeight, double crossProbability, int howMuchTimeInSeconds)
+#include "CDiffEvol.h"
+#include "COptimizer.h"
+#include "CMscnProblem.h"
+#include "CSolution.h"
+#include "CRandom.h"
+#include "CRandomSearch.h"
+#include "CProblem.h"
+#include "COptimizer.h"
+
+double CDiffEvol::startDifferentialEvolution(int howMuchTimeInSeconds)
 {
-	int actualTime = time(NULL);
-	int endingTime = actualTime + howMuchTimeInSeconds;
 	int* err = 0;
 	CRandom rand;
 	populationQuality = new double[populationNumber];
 
-	initPopulation(problem);
+	timer.startTimer();
+	initPopulation();
 
 	for (int i = 0; i < populationNumber; i++)
 	{
 		populationQuality[i] = 0;
 	}
 
-	while (endingTime > actualTime)
+	while ((int)timer.endTimer() < howMuchTimeInSeconds)
 	{
 		for (int i = 0; i < populationNumber; i++)
 		{
@@ -36,9 +43,13 @@ double CDiffEvol::startDifferentialEvolution(CMscnProblem * problem, double diff
 					{
 						indNew[geneOffSet] = population[baseIndividualOffSet][geneOffSet] +
 							differenceWeight * (population[add0IndividualOffSet][geneOffSet] - population[add1InvidualOffSet][geneOffSet]);			
+						
 					}
 					else indNew[geneOffSet] = population[i][geneOffSet];
 				}
+
+				fixGenotype(indNew);
+
 				if (problem->constrainedSatisfied(indNew, err))
 				{
 					double quality = problem->getQuality(indNew, err);
@@ -59,7 +70,6 @@ double CDiffEvol::startDifferentialEvolution(CMscnProblem * problem, double diff
 				}
 			}
 		}
-		actualTime = time(NULL);
 	}
 
 	double best = 0;
@@ -73,7 +83,7 @@ double CDiffEvol::startDifferentialEvolution(CMscnProblem * problem, double diff
 	return best;
 }
 
-void CDiffEvol::initPopulation(CMscnProblem * problem)
+void CDiffEvol::initPopulation()
 {
 	if (populationNumber < 0) return;
 	
@@ -107,4 +117,9 @@ bool CDiffEvol::indexesAreDifferent(int first, int second, int third, int fourth
 	if (third == fourth) answer = false;
 
 	return answer;
+}
+
+void CDiffEvol::fixGenotype(double * genotype)
+{
+	problem->fixSolutionTable(genotype, NULL);
 }

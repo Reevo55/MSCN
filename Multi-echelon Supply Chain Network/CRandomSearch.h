@@ -3,16 +3,21 @@
 #include "CMscnProblem.h"
 #include "CSolution.h"
 #include "CRandom.h"
+#include "CProblem.h"
+#include "COptimizer.h"
 
-class CRandomSearch {
+
+class CRandomSearch: public COptimizer{
 public:
-	CRandomSearch(CMscnProblem* problem) { this->problem = problem; }
-	void setProblem(CMscnProblem* problem) { if (this->problem = NULL) this->problem = problem; }
+	CRandomSearch(CProblem* problem) : COptimizer(problem) {}
+	void setProblem(CProblem* problem) { if (this->problem = NULL) this->problem = problem; }
 	int randomSearch(int howMuchTimeInSeconds);
+
+	void startOptimalization(int howMuchTime) { randomSearch(howMuchTime); }
+
 	void setSeed(int value) { this->seed = value; }
 	int getSeed() { return this->seed; }
 	CSolution nextValid();
 private:
 	int seed;
-	CMscnProblem* problem;
 };

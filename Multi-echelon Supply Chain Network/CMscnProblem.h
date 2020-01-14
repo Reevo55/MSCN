@@ -1,12 +1,5 @@
 #pragma once
 #include "pch.h"
-
-#include "CSolution.h"
-#include "CTable.h"
-#include "CMatrix.h"
-#include "CRandom.h"
-#include "constants.h"
-
 #include <vector>
 #include <string>
 #include <fstream>
@@ -14,9 +7,16 @@
 #include <fstream>
 #include <iostream>
 
+#include "CSolution.h"
+#include "CTable.h"
+#include "CMatrix.h"
+#include "CRandom.h"
+#include "constants.h"
+#include "CProblem.h"
 
 
-class CMscnProblem
+
+class CMscnProblem : public CProblem
 {
 public:
 	CMscnProblem();
@@ -56,6 +56,7 @@ public:
 	double getQuality(CSolution& input_solution, int* err);
 	double getQuality(int* err);
 	double getQuality(double* pdSolution, int* err);
+	double getQualityIfNotGoodImprove(CSolution& input_solution);
 
 	bool constrainedSatisfied(CSolution& input_solution, int* err);
 	bool constrainedSatisfied(double* pdSolution, int* err);
@@ -69,8 +70,11 @@ public:
 	void randomizeSolution(CRandom& rand);
 
 	CSolution& getSolution() { return solution; }
+	double* getPdSolution() { return solution.toDoubleTable(); }
 
 	int sizeOfSolution(){return delivers * factories + factories * magazines + shops * magazines;}
+
+	void fixSolutionTable(double* pdSolution, int length);
 
 private:
 	
@@ -91,6 +95,7 @@ private:
 	bool setInTable(CTable &vec, double value, int i);
 	bool setInVector(std::vector<double> &vec, double value, int i);
 
+	void fixRow(CMatrix& mat, int row);
 
 	int delivers;
 	int factories;

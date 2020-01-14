@@ -1,18 +1,6 @@
 #include "pch.h"
 #include "CMscnProblem.h"
-
-#include "CSolution.h"
-#include "CTable.h"
-#include "CMatrix.h"
-#include "CRandom.h"
-#include "constants.h"
-
-#include <vector>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <fstream>
-#include <iostream>
+#include "CProblem.h"
 
 
 CMscnProblem::CMscnProblem()
@@ -319,6 +307,78 @@ double CMscnProblem::getQuality(double * pdSolution, int * err)
 	return getQuality(err);
 }
 
+double CMscnProblem::getQualityIfNotGoodImprove(CSolution & input_solution)
+{
+
+	for (int i = 0; i < delivers; i++)
+	{
+		if (input_solution.getXd().sumInRow(i) > sd.getValue(i))
+		{
+			fixRow(input_solution.getXd(), i);
+			i--;
+		}
+	}
+
+	for (int i = 0; i < factories; ++i)
+	{
+		if (input_solution.getXf().sumInRow(i) > sf.getValue(i))
+		{
+			fixRow(input_solution.getXf(), i);
+			i--;
+		}
+	}
+
+	for (int i = 0; i < magazines; ++i)
+	{
+		if (input_solution.getXm().sumInRow(i) > sm.getValue(i))
+		{
+			fixRow(input_solution.getXm(), i);
+			i--;
+		}
+	}
+
+	for (int i = 0; i < shops; ++i)
+	{
+		if (input_solution.getXm().sumInColumn(i) > ss.getValue(i))
+		{
+			fixRow(input_solution.getXm(), i);
+			i--;
+		}
+	}
+
+	for (int i = 0; i < factories; ++i)
+	{
+		if (input_solution.getXd().sumInColumn(i) > input_solution.getXf().sumInRow(i))
+		{
+			fixRow(input_solution.getXf(), i);
+			i--;
+		}
+	}
+
+	for (int i = 0; i < magazines; ++i)
+	{
+		if (input_solution.getXd().sumInColumn(i) > input_solution.getXm().sumInRow(i)) {
+			fixRow(input_solution.getXf(), i);
+			i--;
+		}
+	}
+
+	if (!constrainedSatisfied(input_solution, NULL)) getQualityIfNotGoodImprove(input_solution);
+	solution = input_solution;
+	
+
+	return getQuality(NULL);
+}
+
+void CMscnProblem::fixRow(CMatrix& mat, int row)
+{
+	for (int i = 0; i < mat.getColumns(); i++)
+	{
+		mat.set(mat.get(row, i) - REDUCTION_SIZE, row, i);
+		if (mat.get(row, i) < 0) mat.set(0.1, row, i);
+	}
+}
+
 bool CMscnProblem::constrainedSatisfied(CSolution& input_solution, int * err)
 {
 	if (err != NULL)
@@ -484,6 +544,38 @@ void CMscnProblem::generateInstances(int iInstanceSeed)
 
 }
 
+void CMscnProblem::fixSolutionTable(double * pdSolution, int lenght)
+{
+	int k = 0;
+	for (int i = 0; i < delivers; i++)
+	{
+		for (int j = 0; j < factories; j++)
+		{
+			if (pdSolution[k] > xdMax.get(i, j))
+			{
+				std::cout << "tak";
+				pdSolution[k] = xdMax.get(i, j);
+			}
+		}
+	}
+	for (int i = 0; i < factories; i++)
+	{
+		for (int j = 0; j < magazines; j++)
+		{
+			if (pdSolution[k] > xfMax.get(i, j)) 
+				pdSolution[k] = xfMax.get(i, j);
+		}
+	}
+	for (int i = 0; i < magazines; i++)
+	{
+		for (int j = 0; j < shops; j++)
+		{
+			if (pdSolution[k] > xmMax.get(i, j)) 
+				pdSolution[k] = xmMax.get(i, j);
+		}
+	}
+}
+
 void CMscnProblem::saveTableToFile(std::fstream & fs, CTable & table)
 {
 	for (int i = 0; i < table.getTableLen(); i++)
@@ -580,7 +672,7 @@ void CMscnProblem::readMinAndMax(std::fstream & fs, CMatrix & min, CMatrix & max
 	{
 		vector.push_back(num);
 	}
-	if (columns*rows * 2 != vector.size()) return;
+	if (columns * rows * 2 != vector.size()) return;
 
 	min.resize(rows, columns);
 	max.resize(rows, columns);
@@ -686,19 +778,19 @@ void CMscnProblem::randomizeSolution(CRandom& rand)
 	for (int i = 0; i < solution.getXd().getRows(); i++)
 		for (int j = 0; j < solution.getXd().getColumns(); j++)
 		{
-			solution.setInXd(rand.nextDouble(xdMin.get(i,j), xdMax.get(i,j)), i, j);
+			this->solution.setInXd(rand.nextDouble(xdMin.get(i,j), xdMax.get(i,j)), i, j);
 		}
 
 	for (int i = 0; i < solution.getXf().getRows(); i++)
 		for (int j = 0; j < solution.getXf().getColumns(); j++)
 		{
-			solution.setInXf(rand.nextDouble(xfMin.get(i, j), xfMax.get(i, j)), i, j);
+			this->solution.setInXf(rand.nextDouble(xfMin.get(i, j), xfMax.get(i, j)), i, j);
 		}
 
 	for (int i = 0; i < solution.getXm().getRows(); i++)
 		for (int j = 0; j < solution.getXm().getColumns(); j++)
 		{
-			solution.setInXm(rand.nextDouble(xmMin.get(i, j), xmMax.get(i, j)), i, j);
+			this->solution.setInXm(rand.nextDouble(xmMin.get(i, j), xmMax.get(i, j)), i, j);
 		}
 }
 

@@ -157,10 +157,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="constants.h" />
+    <ClInclude Include="COptimizer.h" />
+    <ClInclude Include="CProblem.h" />
     <ClInclude Include="CRandomSearch.h" />
     <ClInclude Include="CSolution.h" />
     <ClInclude Include="CTable.h" />
     <ClInclude Include="CDiffEvol.h" />
+    <ClInclude Include="CTimer.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

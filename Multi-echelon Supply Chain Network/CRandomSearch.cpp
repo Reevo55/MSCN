@@ -1,22 +1,25 @@
 #pragma once
 #include "pch.h"
 #include "CRandomSearch.h"
+#include "COptimizer.h"
+#include "CMscnProblem.h"
+#include "CSolution.h"
+#include "CRandom.h"
+#include "CProblem.h"
 
 
 int CRandomSearch::randomSearch(int howMuchTimeInSeconds)
 {
-	int actualTime = time(NULL);
-	int endingTime = actualTime + howMuchTimeInSeconds;
-
 	int bestQuality = 0;
 	int counter = 0;
 	int current = 0;
 
 	CRandom rand;
+	timer.startTimer();
 
-	while (endingTime > actualTime)
+	while ((int)timer.endTimer() < howMuchTimeInSeconds)
 	{
-		problem->randomizeSolution(rand);
+		((CMscnProblem*)problem)->randomizeSolution(rand);
 		current = problem->getQuality(NULL);
 
 		if (problem->constrainedSatisfied(NULL))
@@ -27,7 +30,7 @@ int CRandomSearch::randomSearch(int howMuchTimeInSeconds)
 				std::cout << "\n";
 				std::cout << counter << ". Teraz wydajnoœæ wynosi³a: " << current << ", najlepsze rozwi¹zanie to: " << bestQuality << ". \n";
 				std::cout << "\n";
-				problem->getSolution().saveToFile("readSolution.txt");
+				//problem->getSolution().saveToFile("readSolution.txt");
 			}
 			else
 			{
@@ -40,8 +43,6 @@ int CRandomSearch::randomSearch(int howMuchTimeInSeconds)
 		{
 			std::cout << counter << ". Teraz wydajnoœæ wynosi³a: " << current << ", ale rozwi¹zanie nie jest prawid³owe, najlepsze rozwi¹zanie to: " << bestQuality << ". \n";
 		}
-
-		actualTime = time(NULL);
 		counter++;
 	}
 	std::cout << " KONIEC! NAJLEPSZA WARTOŒÆ TO: " << bestQuality << "\n";
@@ -58,7 +59,7 @@ CSolution CRandomSearch::nextValid()
 		if (problem->constrainedSatisfied(NULL))
 		{
 			CSolution answer;
-			answer = problem->getSolution();
+			answer = ((CMscnProblem*)problem)->getSolution();
 			return answer;
 		}
 	}
