@@ -13,16 +13,17 @@ int CRandomSearch::randomSearch(int howMuchTimeInSeconds)
 	int bestQuality = 0;
 	int counter = 0;
 	int current = 0;
+	double * solution = new double[problem->sizeOfSolution()];
 
 	CRandom rand;
 	timer.startTimer();
 
 	while ((int)timer.endTimer() < howMuchTimeInSeconds)
 	{
-		((CMscnProblem*)problem)->randomizeSolution(rand);
-		current = problem->getQuality(NULL);
+		solution = problem->randomizeSolution(rand);
+		current = problem->getQuality(solution, NULL);
 
-		if (problem->constrainedSatisfied(NULL))
+		if (problem->constrainedSatisfied(solution, NULL))
 		{
 			if (bestQuality < current)
 			{
@@ -49,18 +50,17 @@ int CRandomSearch::randomSearch(int howMuchTimeInSeconds)
 	return bestQuality;
 }
 
-CSolution CRandomSearch::nextValid()
+double* CRandomSearch::nextValid()
 {
 	CRandom rand(seed);
+	double* solution = new double[problem->sizeOfSolution()];
 
 	while (true)
 	{
-		problem->randomizeSolution(rand);
-		if (problem->constrainedSatisfied(NULL))
+		solution = problem->randomizeSolution(rand);
+		if (problem->constrainedSatisfied(solution, NULL))
 		{
-			CSolution answer;
-			answer = ((CMscnProblem*)problem)->getSolution();
-			return answer;
+			return solution;
 		}
 	}
 }

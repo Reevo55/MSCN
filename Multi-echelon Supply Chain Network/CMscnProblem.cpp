@@ -2,6 +2,13 @@
 #include "CMscnProblem.h"
 #include "CProblem.h"
 
+#include "CSolution.h"
+#include "CTable.h"
+#include "CMatrix.h"
+#include "CRandom.h"
+#include "constants.h"
+#include "CProblem.h"
+
 
 CMscnProblem::CMscnProblem()
 {
@@ -275,36 +282,23 @@ void CMscnProblem::saveToFile(const char * fileName)
 	file.close();
 }
 
-double CMscnProblem::getQuality(CSolution& input_solution, int * err)
-{
-	if (err != NULL)
-	{
-		*err = errorCheck(input_solution);
-		if (*err != 0) return false;
-	}
-
-	solution = input_solution;
-
-	return calculateProfit();
-}
-
-
-double CMscnProblem::getQuality(int * err)
+double CMscnProblem::getQuality(CSolution& solution, int * err)
 {
 	if (err != NULL)
 	{
 		*err = errorCheck(solution);
 		if (*err != 0) return false;
 	}
-
-	return calculateProfit();
+	return calculateProfit(solution);
 }
+
 
 double CMscnProblem::getQuality(double * pdSolution, int * err)
 {
-	this->solution = solution.readFromDoubleTable(pdSolution, delivers, factories,shops, magazines);
+	CSolution solution;
+	solution = solution.readFromDoubleTable(pdSolution, delivers, factories,shops, magazines);
 	
-	return getQuality(err);
+	return getQuality(solution, err);
 }
 
 double CMscnProblem::getQualityIfNotGoodImprove(CSolution & input_solution)
@@ -363,11 +357,9 @@ double CMscnProblem::getQualityIfNotGoodImprove(CSolution & input_solution)
 		}
 	}
 
-	if (!constrainedSatisfied(input_solution, NULL)) getQualityIfNotGoodImprove(input_solution);
-	solution = input_solution;
-	
+	if (!constrainedSatisfied(input_solution, NULL)) getQualityIfNotGoodImprove(input_solution);	
 
-	return getQuality(NULL);
+	return getQuality(input_solution, NULL);
 }
 
 void CMscnProblem::fixRow(CMatrix& mat, int row)
@@ -379,58 +371,7 @@ void CMscnProblem::fixRow(CMatrix& mat, int row)
 	}
 }
 
-bool CMscnProblem::constrainedSatisfied(CSolution& input_solution, int * err)
-{
-	if (err != NULL)
-	{
-		*err = errorCheck(input_solution);
-		if (*err != 0) return false;
-	}
-
-	solution = input_solution;
-
-	for (int i = 0; i < delivers; i++)
-	{
-		if (solution.getXd().sumInRow(i) > sd.getValue(i)) return false;
-	}
-
-	for (int i = 0; i < factories; ++i)
-	{
-		if (solution.getXf().sumInRow(i) > sf.getValue(i)) return false;
-	}
-
-	for (int i = 0; i < magazines; ++i)
-	{
-		if (solution.getXm().sumInRow(i) > sm.getValue(i)) return false;
-	}
-
-	for (int i = 0; i < shops; ++i)
-	{
-		if (solution.getXm().sumInColumn(i) > ss.getValue(i)) return false;
-	}
-
-	for (int i = 0; i < factories; ++i)
-	{
-		if (solution.getXd().sumInColumn(i) > solution.getXf().sumInRow(i)) return false;
-	}
-
-	for (int i = 0; i < magazines; ++i)
-	{
-		if (solution.getXd().sumInColumn(i) > solution.getXm().sumInRow(i)) return false;
-	}
-
-	return true;
-}
-
-bool CMscnProblem::constrainedSatisfied(double * pdSolution, int * err)
-{
-	this->solution = solution.readFromDoubleTable(pdSolution, delivers, factories, shops, magazines);
-
-	return constrainedSatisfied(err);
-}
-
-
-bool CMscnProblem::constrainedSatisfied(int * err)
+bool CMscnProblem::constrainedSatisfied(CSolution& solution, int * err)
 {
 	if (err != NULL)
 	{
@@ -470,9 +411,19 @@ bool CMscnProblem::constrainedSatisfied(int * err)
 
 	return true;
 }
-double CMscnProblem::calculateProfit()
+
+bool CMscnProblem::constrainedSatisfied(double * pdSolution, int * err)
 {
-	return calculateP() - calculateKu() - calculateKt();
+	CSolution solution;
+	solution = solution.readFromDoubleTable(pdSolution, delivers, factories, shops, magazines);
+
+	return constrainedSatisfied(solution, err);
+}
+
+
+double CMscnProblem::calculateProfit(CSolution& solution)
+{
+	return calculateP(solution) - calculateKu(solution) - calculateKt(solution);
 }
 
 void CMscnProblem::debuggingPrint()
@@ -688,7 +639,7 @@ void CMscnProblem::readMinAndMax(std::fstream & fs, CMatrix & min, CMatrix & max
 		}
 }
 
-double CMscnProblem::calculateKt()
+double CMscnProblem::calculateKt(CSolution& solution)
 {
 	double resultDelivery = 0;
 
@@ -711,7 +662,7 @@ double CMscnProblem::calculateKt()
 	return resultDelivery + resultMagazine + resultShop;
 }
 
-double CMscnProblem::calculateKu()
+double CMscnProblem::calculateKu(CSolution& solution)
 {
 	double resultDelivery = 0;
 
@@ -735,7 +686,7 @@ double CMscnProblem::calculateKu()
 	return resultDelivery + resultMagazine + resultShop;
 }
 
-double CMscnProblem::calculateP()
+double CMscnProblem::calculateP(CSolution& solution)
 {
 	double result = 0;
 	for (int i = 0; i < magazines; i++)
@@ -773,25 +724,29 @@ bool CMscnProblem::setInVector(std::vector<double> &vec, double value, int i)
 }
 
 
-void CMscnProblem::randomizeSolution(CRandom& rand)
+double* CMscnProblem::randomizeSolution(CRandom& rand)
 {
+	CSolution solution(delivers, factories, magazines, shops);
+
 	for (int i = 0; i < solution.getXd().getRows(); i++)
 		for (int j = 0; j < solution.getXd().getColumns(); j++)
 		{
-			this->solution.setInXd(rand.nextDouble(xdMin.get(i,j), xdMax.get(i,j)), i, j);
+			solution.setInXd(rand.nextDouble(xdMin.get(i,j), xdMax.get(i,j)), i, j);
 		}
 
 	for (int i = 0; i < solution.getXf().getRows(); i++)
 		for (int j = 0; j < solution.getXf().getColumns(); j++)
 		{
-			this->solution.setInXf(rand.nextDouble(xfMin.get(i, j), xfMax.get(i, j)), i, j);
+			solution.setInXf(rand.nextDouble(xfMin.get(i, j), xfMax.get(i, j)), i, j);
 		}
 
 	for (int i = 0; i < solution.getXm().getRows(); i++)
 		for (int j = 0; j < solution.getXm().getColumns(); j++)
 		{
-			this->solution.setInXm(rand.nextDouble(xmMin.get(i, j), xmMax.get(i, j)), i, j);
+			solution.setInXm(rand.nextDouble(xmMin.get(i, j), xmMax.get(i, j)), i, j);
 		}
+
+	return solution.toDoubleTable();
 }
 
 bool CMscnProblem::checkIfMinMaxIsRight(CSolution& solution)

@@ -12,6 +12,16 @@
 
 class CSolution {
 public:
+	CSolution(int d, int f, int m, int s)
+	{
+		delivers = d;
+		factories = f;
+		magazines = m;
+		shops = s;
+		xd = CMatrix(d,f);
+		xf = CMatrix(f,m);
+		xm = CMatrix(m,s);
+	}
 	CSolution() { 
 		xd = CMatrix();
 		xf = CMatrix();

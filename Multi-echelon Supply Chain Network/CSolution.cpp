@@ -64,28 +64,19 @@ void CSolution::readFromFile(const char* fileName)
 
 CSolution CSolution::readFromDoubleTable(double * pdSolution, int delivers, int factories, int shops, int magazines)
 {
-	CSolution help;
-	help.delivers = delivers;
-	help.factories = factories;
-	help.shops = shops;
-	help.magazines = magazines;
-
-	help.xd.resize(factories, delivers);
-	help.xf.resize(magazines, factories);
-	help.xm.resize(shops, magazines);
-		
+	CSolution help(delivers, factories, shops, magazines);
 
 	for (int i = 0; i < delivers; ++i)
 		for (int j = 0; j < factories; ++j)
 			help.xd.set(pdSolution[i*factories + j], i, j);
 
-	int xdSize = xd.getMaxSize();
+	int xdSize = help.getXd().getMaxSize();
 
 	for (int i = 0; i < factories; ++i)
 		for (int j = 0; j < magazines; ++j)
 			help.xf.set(pdSolution[xdSize + i * magazines + j], i, j);
 
-	int xfSize = xf.getMaxSize();
+	int xfSize = help.getXf().getMaxSize();
 
 	for (int i = 0; i < magazines; ++i)
 		for (int j = 0; j < shops; ++j)

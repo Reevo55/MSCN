@@ -96,8 +96,8 @@ void CDiffEvol::initPopulation()
 		population[i] = new double[problem->sizeOfSolution()];
 
 		randomSearch.setSeed(rand());
-		CSolution solution = randomSearch.nextValid();
-		double* helperTable = solution.toDoubleTable();
+
+		double* helperTable = randomSearch.nextValid();
 
 		for (int j = 0; j < problem->sizeOfSolution(); j++)
 		{

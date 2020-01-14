@@ -1,5 +1,12 @@
 #pragma once
 #include "pch.h"
+#include "CSolution.h"
+#include "CTable.h"
+#include "CMatrix.h"
+#include "CRandom.h"
+#include "constants.h"
+#include "CProblem.h"
+
 #include <vector>
 #include <string>
 #include <fstream>
@@ -7,12 +14,6 @@
 #include <fstream>
 #include <iostream>
 
-#include "CSolution.h"
-#include "CTable.h"
-#include "CMatrix.h"
-#include "CRandom.h"
-#include "constants.h"
-#include "CProblem.h"
 
 
 
@@ -54,23 +55,18 @@ public:
 	void saveToFile(const char* fileName);
 	
 	double getQuality(CSolution& input_solution, int* err);
-	double getQuality(int* err);
 	double getQuality(double* pdSolution, int* err);
 	double getQualityIfNotGoodImprove(CSolution& input_solution);
 
 	bool constrainedSatisfied(CSolution& input_solution, int* err);
 	bool constrainedSatisfied(double* pdSolution, int* err);
-	bool constrainedSatisfied(int* err);
 
 	void debuggingPrint();
 
 	int errorCheck(CSolution& input_solution);
 
 	void generateInstances(int iInstanceSeed);
-	void randomizeSolution(CRandom& rand);
-
-	CSolution& getSolution() { return solution; }
-	double* getPdSolution() { return solution.toDoubleTable(); }
+	double* randomizeSolution(CRandom& rand);
 
 	int sizeOfSolution(){return delivers * factories + factories * magazines + shops * magazines;}
 
@@ -86,10 +82,10 @@ private:
 	void readMatrixFromFile(std::fstream& fs, CMatrix& matrix, int rows, int columns);
 	void readMinAndMax(std::fstream& fs, CMatrix& min, CMatrix& max, int rows, int columns);
 
-	double calculateProfit();
-	double calculateKt();
-	double calculateKu();
-	double calculateP();
+	double calculateProfit(CSolution& solution);
+	double calculateKt(CSolution& solution);
+	double calculateKu(CSolution& solution);
+	double calculateP(CSolution& solution);
 
 	bool setInMatrix(CMatrix& mat, double value, int i, int j);
 	bool setInTable(CTable &vec, double value, int i);
@@ -101,8 +97,6 @@ private:
 	int factories;
 	int magazines;
 	int shops;
-
-	CSolution solution;
 
 	CMatrix cd;
 	CMatrix cf;

@@ -11,7 +11,7 @@
 
 void test()
 {
-	int timeDiff = 10;
+	int timeDiff = 5;
 
 	int populationSize = 10;
 	double crosProb = 0.2;
@@ -36,8 +36,8 @@ void test()
 
 	//////////////RANDOMSEARCH////////////////////
 
-	// CRandomSearch randomSearch(problem);
-	// randomSearch.randomSearch(timeRandomSearch);
+	 CRandomSearch randomSearch(problem);
+	 randomSearch.randomSearch(timeRandomSearch);
 	
 	
 	//////////////DIFERANTIAL////////////////////

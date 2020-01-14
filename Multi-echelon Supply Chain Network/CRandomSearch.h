@@ -17,7 +17,7 @@ public:
 
 	void setSeed(int value) { this->seed = value; }
 	int getSeed() { return this->seed; }
-	CSolution nextValid();
+	double* nextValid();
 private:
 	int seed;
 };
