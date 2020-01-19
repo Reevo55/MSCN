@@ -16,7 +16,7 @@ void test()
 	int populationSize = 10;
 	double crosProb = 0.2;
 	double diffWeight = 0.5;
-	int timeRandomSearch = 10;
+	int timeRandomSearch = 1000;
 
 	CTimer time;
 
@@ -31,8 +31,8 @@ void test()
 	std::cout << "Quality: " << (*problem).getQuality(csolution, err) << "\n";
 	std::cout << "Constrained satisfied: " << (*problem).constrainedSatisfied(csolution, err) << "\n";
 
-	std::cout << "Quality: " << (*problem).getQualityIfNotGoodImprove(csolution) << "\n";
-	std::cout << "Constrained satisfied: " << (*problem).constrainedSatisfied(csolution, err) << "\n";
+	//std::cout << "Quality: " << (*problem).getQualityIfNotGoodImprove(csolution) << "\n";
+	//std::cout << "Constrained satisfied: " << (*problem).constrainedSatisfied(csolution, err) << "\n";
 
 	//////////////RANDOMSEARCH////////////////////
 
@@ -43,7 +43,6 @@ void test()
 	//////////////DIFERANTIAL////////////////////
 	CDiffEvol diff(problem, diffWeight, crosProb, populationSize);
 	std::cout << "Najlepszy wynik to: " << diff.startDifferentialEvolution(timeDiff) << "\n";
-
 
 }
 

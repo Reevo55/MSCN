@@ -10,7 +10,7 @@
 
 int CRandomSearch::randomSearch(int howMuchTimeInSeconds)
 {
-	int bestQuality = 0;
+	int bestQuality = -99999999;
 	int counter = 0;
 	int current = 0;
 	double * solution = new double[problem->sizeOfSolution()];

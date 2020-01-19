@@ -623,7 +623,6 @@ void CMscnProblem::readMinAndMax(std::fstream & fs, CMatrix & min, CMatrix & max
 	{
 		vector.push_back(num);
 	}
-	if (columns * rows * 2 != vector.size()) return;
 
 	min.resize(rows, columns);
 	max.resize(rows, columns);
@@ -631,12 +630,19 @@ void CMscnProblem::readMinAndMax(std::fstream & fs, CMatrix & min, CMatrix & max
 	int helpVec = 0;
 
 	for (int i = 0; i < rows; i++)
+	{
 		for (int j = 0; j < columns; j++)
 		{
 			min.set(vector[helpVec], i, j);
-			helpVec++;
+		}
+
+		helpVec++;
+
+		for (int j = 0; j < columns; j++)
+		{
 			max.set(vector[helpVec], i, j);
 		}
+	}
 }
 
 double CMscnProblem::calculateKt(CSolution& solution)
